@@ -30,6 +30,42 @@ class Board
   end
 end
 
+class Player
+  attr_accessor :current
+
+  def initialize
+    @current = "\u2716"
+  end
+
+  def switch
+    @current = @current == "\u2716" ? "\u274d" : "\u2716"
+  end
+end
+
+class Turn
+
+end
+
+class PlayerInput
+  def self.get
+    check input
+  end
+
+  def self.input
+    gets.chomp
+  end
+
+  def self.check input
+    number = /\d+/.match(input)
+    if number
+      number.string.to_i % 7
+    else
+      puts 'Please input a column number'
+      self.get
+    end
+  end
+end
+
 class Game
   def initialize
     @player = "\u274d"
@@ -42,24 +78,6 @@ class Game
 
   def ask
     puts "Where do you want to put #{@player}?"
-  end
-
-  def get_input
-    check input
-  end
-
-  def input
-    gets.chomp
-  end
-
-  def check input
-    number = /\d+/.match(input)
-    if number
-      number.string.to_i % 7
-    else
-      puts 'Please input a column number'
-      get_input
-    end
   end
 
   def result win
@@ -80,9 +98,5 @@ class Game
     end
 
     win
-  end
-
-  def switch
-    @player == "\u2716" ? @player = "\u274d" : @player = "\u2716"
   end
 end

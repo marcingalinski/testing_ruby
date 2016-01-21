@@ -56,10 +56,9 @@ describe Field do
 end
 
 describe Board do
-  let(:board) { Board.new }
   describe '#fields' do
     context 'on initialize' do
-      let(:fields) { board.fields }
+      let(:fields) { subject.fields }
 
       it 'returns an array' do
         expect(fields).to be_an_instance_of Array
@@ -74,7 +73,63 @@ describe Board do
 
   describe '#show' do
     it 'shows board' do
-      expect { board.show }.to output(an_instance_of String).to_stdout
+      expect { subject.show }.to output(an_instance_of String).to_stdout
+    end
+  end
+end
+
+describe Player do
+  it { is_expected.to have_attributes(current: "\u2716") }
+
+  describe '#switch' do
+    it 'switches players' do
+      expect { subject.switch }.to change { subject.current }.to("\u274d")
+    end
+  end
+end
+
+describe Turn do
+
+end
+
+describe PlayerInput do
+  describe '.get' do
+    it 'takes user input and returns number of a column' do
+      expect(PlayerInput.get).to be_a_kind_of Integer
+    end
+  end
+
+
+  describe '#input' do
+    it 'returns string from stdin' do
+      expect(PlayerInput.input).to be_an_instance_of String
+    end
+  end
+
+  describe '#check' do
+    context 'with a number not greater than 6' do
+      it 'returns number of a column' do
+        expect(PlayerInput.check '1').to eql 1
+      end
+    end
+
+    context 'with a number greater than 6' do
+      it 'returns a valid column number using modulo' do
+        expect(PlayerInput.check '10').to eql 3
+        expect(PlayerInput.check '21').to eql 0
+      end
+    end
+
+    context 'without numeric characters in input' do
+      it 'asks for proper input' do
+        expect { PlayerInput.check 'adef' }.to output(/Please input a column number/).to_stdout
+      end
+    end
+
+    context 'with numeric and non-numeric chracters in input' do
+      it 'finds number and returns valid coumn number' do
+        expect(PlayerInput.check 'cc21').to eql 0
+      end
     end
   end
 end
@@ -100,39 +155,6 @@ describe Game do
   describe '#ask' do
     it 'asks user for input' do
       expect { game.ask }.to output("Where do you want to put \u274d?\n").to_stdout
-    end
-  end
-
-  describe '#input' do
-    it 'returns string from stdin' do
-      expect(game.input).to be_an_instance_of String
-    end
-  end
-
-  describe '#check' do
-    context 'with a number not greater than 6' do
-      it 'returns number of a column' do
-        expect(game.check '1').to eql 1
-      end
-    end
-
-    context 'with a number greater than 6' do
-      it 'returns a valid column number using modulo' do
-        expect(game.check '10').to eql 3
-        expect(game.check '21').to eql 0
-      end
-    end
-
-    context 'without numeric characters in input' do
-      it 'asks for proper input' do
-        expect { game.check 'adef' }.to output(/Please input a column number/).to_stdout
-      end
-    end
-
-    context 'with numeric and non-numeric chracters in input' do
-      it 'finds number and returns valid coumn number' do
-        expect(game.check 'cc21').to eql 0
-      end
     end
   end
 
@@ -198,15 +220,6 @@ describe Game do
       it 'returns a win message' do
         game.instance_variable_set(:@player, "\u2716")
         expect(game.result true).to eql "The winner is \u2716!"
-      end
-    end
-  end
-
-  describe '#switch' do
-    context 'after each turn' do
-      it 'switches player' do
-        game.instance_variable_set(:@player, "\u2716")
-        expect { game.switch }.to change { game.instance_variable_get :@player }.to "\u274d"
       end
     end
   end
