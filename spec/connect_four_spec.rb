@@ -16,7 +16,7 @@ describe Field do
 
   context 'during the game' do
     it 'changes taken_by' do
-      expect { field.taken_by = :red }.to change { field.taken_by }.to :red
+      expect { field.taken_by = "\u2716" }.to change { field.taken_by }.to "\u2716"
     end
 
     it 'doesn\'t change number' do
@@ -33,7 +33,7 @@ describe Field do
 
     context 'when field is occupied' do
       it 'returns true' do
-        field.taken_by = :red
+        field.taken_by = "\u2716"
         expect(field.taken?).to be_truthy
       end
     end
@@ -46,9 +46,9 @@ describe Field do
       end
 
       context 'field is taken' do
-        it 'returns fields owner as a string' do
-          field.taken_by = :red
-          expect(field.parse).to eql 'red'
+        it 'returns fields' do
+          field.taken_by = "\u2716"
+          expect(field.parse).to eql "\u2716"
         end
       end
     end
@@ -86,8 +86,8 @@ describe Game do
       expect(game.instance_variable_get :@board).to be_an_instance_of Board
     end
 
-    it 'sets player to yellow' do
-      expect(game.instance_variable_get :@player).to eql :yellow
+    it "sets player to \u274d" do
+      expect(game.instance_variable_get :@player).to eql "\u274d"
     end
   end
 
@@ -99,7 +99,7 @@ describe Game do
 
   describe '#ask' do
     it 'asks user for input' do
-      expect { game.ask }.to output("Where do you want to put yellow?\n").to_stdout
+      expect { game.ask }.to output("Where do you want to put \u274d?\n").to_stdout
     end
   end
 
@@ -138,7 +138,7 @@ describe Game do
 
   describe '#win?' do
     before do
-      game.instance_variable_set(:@player, :red)
+      game.instance_variable_set(:@player, "\u2716")
     end
 
     context 'when win condition not met' do
@@ -149,10 +149,10 @@ describe Game do
 
     context 'with four in a row horizontally' do
       before do
-        game.instance_variable_get(:@board).fields[0].taken_by = :red
-        game.instance_variable_get(:@board).fields[1].taken_by = :red
-        game.instance_variable_get(:@board).fields[2].taken_by = :red
-        game.instance_variable_get(:@board).fields[3].taken_by = :red
+        game.instance_variable_get(:@board).fields[0].taken_by = "\u2716"
+        game.instance_variable_get(:@board).fields[1].taken_by = "\u2716"
+        game.instance_variable_get(:@board).fields[2].taken_by = "\u2716"
+        game.instance_variable_get(:@board).fields[3].taken_by = "\u2716"
       end
 
       it 'returns true' do
@@ -162,10 +162,10 @@ describe Game do
 
     context 'with four in a row vertically' do
       before do
-        game.instance_variable_get(:@board).fields[2].taken_by = :red
-        game.instance_variable_get(:@board).fields[9].taken_by = :red
-        game.instance_variable_get(:@board).fields[16].taken_by = :red
-        game.instance_variable_get(:@board).fields[23].taken_by = :red
+        game.instance_variable_get(:@board).fields[2].taken_by = "\u2716"
+        game.instance_variable_get(:@board).fields[9].taken_by = "\u2716"
+        game.instance_variable_get(:@board).fields[16].taken_by = "\u2716"
+        game.instance_variable_get(:@board).fields[23].taken_by = "\u2716"
       end
 
       it 'returns true' do
@@ -175,10 +175,10 @@ describe Game do
 
     context 'with four in a row diagonally' do
       before do
-        game.instance_variable_get(:@board).fields[0].taken_by = :red
-        game.instance_variable_get(:@board).fields[8].taken_by = :red
-        game.instance_variable_get(:@board).fields[16].taken_by = :red
-        game.instance_variable_get(:@board).fields[24].taken_by = :red
+        game.instance_variable_get(:@board).fields[0].taken_by = "\u2716"
+        game.instance_variable_get(:@board).fields[8].taken_by = "\u2716"
+        game.instance_variable_get(:@board).fields[16].taken_by = "\u2716"
+        game.instance_variable_get(:@board).fields[24].taken_by = "\u2716"
       end
 
       it 'returns true' do
@@ -194,10 +194,10 @@ describe Game do
       end
     end
 
-    context 'red wins' do
+    context '\u2716 wins' do
       it 'returns a win message' do
-        game.instance_variable_set(:@player, :red)
-        expect(game.result true).to eql "The winner is red!"
+        game.instance_variable_set(:@player, "\u2716")
+        expect(game.result true).to eql "The winner is \u2716!"
       end
     end
   end
@@ -205,8 +205,8 @@ describe Game do
   describe '#switch' do
     context 'after each turn' do
       it 'switches player' do
-        game.instance_variable_set(:@player, :red)
-        expect { game.switch }.to change { game.instance_variable_get :@player }
+        game.instance_variable_set(:@player, "\u2716")
+        expect { game.switch }.to change { game.instance_variable_get :@player }.to "\u274d"
       end
     end
   end

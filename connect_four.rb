@@ -32,7 +32,7 @@ end
 
 class Game
   def initialize
-    @player = :yellow
+    @player = "\u274d"
     @board = Board.new
   end
 
@@ -83,6 +83,6 @@ class Game
   end
 
   def switch
-    @player == :red ? @player = :yellow : @player = :red
+    @player == "\u2716" ? @player = "\u274d" : @player = "\u2716"
   end
 end
