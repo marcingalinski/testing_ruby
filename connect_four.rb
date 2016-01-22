@@ -1,3 +1,5 @@
+require 'set'
+
 class Field
   attr_accessor :taken_by
   attr_reader :number
@@ -11,22 +13,63 @@ class Field
   end
 
   def parse
-    self.taken? ? @taken_by.to_s : ' '
+    self.taken? ? @taken_by : ' '
   end
 end
 
 class Board
-  attr_accessor :fields
+  attr_accessor(:fields, :win)
 
   def initialize
     @fields = Array.new(42) { |i| Field.new i }
+    @win = false
   end
 
   def show
     puts (0..6).to_a.join '|'
     6.times do |i|
-      puts Array.new(7) { |j| fields[i * j].parse }.join '|'
+      puts Array.new(7) { |j| fields[i * 7 + j].parse }.join '|'
     end
+  end
+
+  def win? player
+    player_fields = @fields.select { |field| field.taken_by == player }
+    fields_numbers = player_fields.map(&:number).to_set
+    offsets = [1, 6, 7, 8]
+
+    to_check_with_1 = fields_numbers.reject do |n|
+      (4..6).include? n % 7
+    end
+
+    to_check_with_1.each do |field|
+      row = Array.new(4) { |i| field + i }
+      return @win = true if row.to_set.subset? fields_numbers
+    end
+
+    to_check_with_6 = fields_numbers.reject do |n|
+      (0..3).include? n % 7
+    end
+
+    to_check_with_6.each do |field|
+      row = Array.new(4) { |i| field + i * 6 }
+      return @win = true if row.to_set.subset? fields_numbers
+    end
+
+    to_check_with_7 = fields_numbers
+
+    to_check_with_7.each do |field|
+      row = Array.new(4) { |i| field + i * 7 }
+      return @win = true if row.to_set.subset? fields_numbers
+    end
+
+    to_check_with_8 = to_check_with_1
+
+    to_check_with_8.each do |field|
+      row = Array.new(4) { |i| field + i * 8 }
+      return @win = true if row.to_set.subset? fields_numbers
+    end
+
+    return false
   end
 end
 
@@ -43,33 +86,82 @@ class Player
 end
 
 class Turn
+  attr_accessor :field_number
 
+  def initialize game
+    @game = game
+    PlayerInput.new self
+    mark_field
+  end
+
+  def mark_field
+    if @game.board.fields[@field_number].taken?
+      ask_for_another
+    else
+      find_empty_field
+    end
+  end
+
+  def ask_for_another
+    puts "Choose another column. This one is full!"
+    PlayerInput.new self
+    mark_field
+  end
+
+  def find_empty_field
+    row = 6
+
+    while row > 0
+      row -= 1
+      field = @game.board.fields[row * 7 + @field_number]
+      unless field.taken?
+        field.taken_by = @game.player.current
+        break
+      end
+    end
+  end
 end
 
 class PlayerInput
-  def self.get
+  def initialize turn
+    turn.field_number = get_input
+  end
+
+  def get_input
     check input
   end
 
-  def self.input
+  def input
     gets.chomp
   end
 
-  def self.check input
+  def check input
     number = /\d+/.match(input)
     if number
       number.string.to_i % 7
     else
       puts 'Please input a column number'
-      self.get
+      get_input
     end
   end
 end
 
 class Game
+  attr_accessor(:board, :player)
+
   def initialize
-    @player = "\u274d"
+    @player = Player.new
     @board = Board.new
+    greet
+    42.times do
+      @player.switch
+      ask
+      @board.show
+      Turn.new self
+      break if @board.win? @player.current
+    end
+    @board.show
+    puts result @board.win
   end
 
   def greet
@@ -77,26 +169,12 @@ class Game
   end
 
   def ask
-    puts "Where do you want to put #{@player}?"
+    puts "Where do you want to put #{@player.current}?"
   end
 
   def result win
-    win ? "The winner is #{@player}!" : "It's a draw!"
-  end
-
-  def win?
-    win = false
-    player_fields = @board.fields.select { |field| field.taken_by == @player }
-    fields_numbers = player_fields.map(&:number).to_set
-    offsets = [1, 6, 7, 8]
-
-    fields_numbers.each do |field|
-      offsets.each do |offset|
-        row = Array.new(4) { |i| field + offset * i }
-        win = true if row.to_set.subset? fields_numbers
-      end
-    end
-
-    win
+    win ? "The winner is #{@player.current}!" : "It's a draw!"
   end
 end
+
+Game.new
